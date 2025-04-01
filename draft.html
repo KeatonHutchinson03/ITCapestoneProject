@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platformer Game</title>
+    <style>
+        canvas { background: lightblue; display: block; margin: auto; display: none; }
+        #saveSelection { text-align: center; margin-bottom: 10px; }
+        .saveSlot { display: inline-block; padding: 20px; margin: 10px; border: 2px solid black; cursor: pointer; }
+        #countdown { text-align: center; font-size: 24px; display: none; }
+    </style>
+</head>
+<body>
+    <div id="saveSelection">
+        <div class="saveSlot" onclick="selectSaveSlot(1)">Player 1<br><span id="progress1">Loading...</span></div>
+        <div class="saveSlot" onclick="selectSaveSlot(2)">Player 2<br><span id="progress2">Loading...</span></div>
+        <div class="saveSlot" onclick="selectSaveSlot(3)">Player 3<br><span id="progress3">Loading...</span></div>
+    </div>
+    <div id="countdown"></div>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 800;
+        canvas.height = 400;
+       
+        let selectedSaveSlot = 1;
+        let gameRunning = false;
+        let worldOffset = 0;
+        let checkpoints = Array.from({ length: 20 }, (_, i) => (i + 1) * 200);
+        let currentCheckpoint = 0;
+        let gameSpeed = 3;
+        let cheeseCollected = 0;
+        let obstacles = [];
+        let cheeseBlocks = [];
+       
+        // Load images
+        const mouseSprite = new Image();
+        mouseSprite.src = "mouse.png";
+        const mousetrapSprite = new Image();
+        mousetrapSprite.src = "mousetrap.png";
+        const catSprite = new Image();
+        catSprite.src = "cat.png";
+        const cheeseSprite = new Image();
+        cheeseSprite.src = "cheese.png";
+       
+        const player = {
+            x: 100,
+            y: 300,
+            width: 50,
+            height: 50,
+            velocityY: 0,
+            gravity: 0.5,
+            isJumping: false,
+            isDucking: false
+        };
+       
+        function generateObstaclesAndCheese() {
+            obstacles = [];
+            cheeseBlocks = [];
+            for (let i = 300; i < 4000; i += Math.random() * 400 + 200) {
+                let type = Math.random() > 0.5 ? "mousetrap" : "cat";
+                let y = type === "mousetrap" ? 330 : 250;
+                obstacles.push({ type, x: i, y, width: 50, height: type === "mousetrap" ? 20 : 50 });
+            }
+            for (let i = 400; i < 4000; i += Math.random() * 400 + 200) {
+                let y = Math.random() > 0.5 ? 250 : 200;
+                if (!obstacles.some(ob => Math.abs(ob.x - i) < 100)) {
+                    cheeseBlocks.push({ x: i, y, width: 30, height: 30 });
+                }
+            }
+        }
+       
+        function saveProgress() {
+            localStorage.setItem(`platformerSave${selectedSaveSlot}`, JSON.stringify({ checkpoint: currentCheckpoint, cheese: cheeseCollected }));
+        }
+       
+        function loadProgress() {
+            for (let i = 1; i <= 3; i++) {
+                let saveData = localStorage.getItem(`platformerSave${i}`);
+                let progress = saveData ? JSON.parse(saveData).checkpoint * 200 : 0;
+                document.getElementById(`progress${i}`).innerText = `Checkpoint: ${progress}`;
+            }
+        }
+       
+        function selectSaveSlot(slot) {
+            selectedSaveSlot = slot;
+            let saveData = localStorage.getItem(`platformerSave${selectedSaveSlot}`);
+            if (saveData) {
+                let data = JSON.parse(saveData);
+                currentCheckpoint = data.checkpoint;
+                cheeseCollected = data.cheese;
+                worldOffset = checkpoints[currentCheckpoint] - 100;
+            }
+            document.getElementById("saveSelection").style.display = "none";
+            startCountdown();
+        }
+       
+        function startCountdown() {
+            let count = 5;
+            document.getElementById("countdown").style.display = "block";
+            function tick() {
+                document.getElementById("countdown").innerText = count;
+                if (count === 0) {
+                    document.getElementById("countdown").style.display = "none";
+                    canvas.style.display = "block";
+                    gameRunning = true;
+                    generateObstaclesAndCheese();
+                    gameLoop();
+                } else {
+                    count--;
+                    setTimeout(tick, 1000);
+                }
+            }
+            tick();
+        }
+       
+        function update() {
+            if (!gameRunning) return;
+            player.y += player.velocityY;
+            player.velocityY += player.gravity;
+            if (player.y > 300) {
+                player.y = 300;
+                player.isJumping = false;
+            }
+            worldOffset += gameSpeed;
+            if (currentCheckpoint < checkpoints.length && worldOffset >= checkpoints[currentCheckpoint] - 100) {
+                saveProgress();
+                currentCheckpoint++;
+            }
+            obstacles.forEach(ob => {
+                if (player.x + player.width > ob.x - worldOffset && player.x < ob.x - worldOffset + ob.width && player.y + player.height > ob.y) {
+                    worldOffset = checkpoints[currentCheckpoint] - 100;
+                }
+            });
+            cheeseBlocks = cheeseBlocks.filter(cheese => {
+                if (player.x + player.width > cheese.x - worldOffset && player.x < cheese.x - worldOffset + cheese.width && player.y < cheese.y + cheese.height) {
+                    cheeseCollected += 50;
+                    return false;
+                }
+                return true;
+            });
+        }
+       
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "green";
+            ctx.fillRect(0, 350, canvas.width, 50);
+            ctx.drawImage(mouseSprite, player.x, player.y, player.width, player.height);
+            obstacles.forEach(ob => ctx.drawImage(ob.type === "mousetrap" ? mousetrapSprite : catSprite, ob.x - worldOffset, ob.y, ob.width, ob.height));
+            cheeseBlocks.forEach(cheese => ctx.drawImage(cheeseSprite, cheese.x - worldOffset, cheese.y, cheese.width, cheese.height));
+        }
+       
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+       
+        loadProgress();
+    </script>
+</body>
+</html>
