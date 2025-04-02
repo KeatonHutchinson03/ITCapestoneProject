@@ -8,14 +8,15 @@
         canvas { background: lightblue; display: block; margin: auto; display: none; }
         #saveSelection { text-align: center; margin-bottom: 10px; }
         .saveSlot { display: inline-block; padding: 20px; margin: 10px; border: 2px solid black; cursor: pointer; }
+        .resetButton { display: block; margin-top: 5px; cursor: pointer; background-color: red; color: white; padding: 5px; }
         #countdown { text-align: center; font-size: 24px; display: none; }
     </style>
 </head>
 <body>
     <div id="saveSelection">
-        <div class="saveSlot" onclick="selectSaveSlot(1)">Player 1<br><span id="progress1">Loading...</span></div>
-        <div class="saveSlot" onclick="selectSaveSlot(2)">Player 2<br><span id="progress2">Loading...</span></div>
-        <div class="saveSlot" onclick="selectSaveSlot(3)">Player 3<br><span id="progress3">Loading...</span></div>
+        <div class="saveSlot" onclick="selectSaveSlot(1)">Player 1<br><span id="progress1">Loading...</span><button class="resetButton" onclick="resetSave(1); event.stopPropagation();">Reset</button></div>
+        <div class="saveSlot" onclick="selectSaveSlot(2)">Player 2<br><span id="progress2">Loading...</span><button class="resetButton" onclick="resetSave(2); event.stopPropagation();">Reset</button></div>
+        <div class="saveSlot" onclick="selectSaveSlot(3)">Player 3<br><span id="progress3">Loading...</span><button class="resetButton" onclick="resetSave(3); event.stopPropagation();">Reset</button></div>
     </div>
     <div id="countdown"></div>
     <canvas id="gameCanvas"></canvas>
@@ -24,7 +25,7 @@
         const ctx = canvas.getContext("2d");
         canvas.width = 800;
         canvas.height = 400;
-       
+        
         let selectedSaveSlot = 1;
         let gameRunning = false;
         let worldOffset = 0;
@@ -34,7 +35,8 @@
         let cheeseCollected = 0;
         let obstacles = [];
         let cheeseBlocks = [];
-       
+        let gamepadIndex = null;
+        
         // Load images
         const mouseSprite = new Image();
         mouseSprite.src = "mouse.png";
@@ -44,7 +46,7 @@
         catSprite.src = "cat.png";
         const cheeseSprite = new Image();
         cheeseSprite.src = "cheese.png";
-       
+        
         const player = {
             x: 100,
             y: 300,
@@ -55,7 +57,7 @@
             isJumping: false,
             isDucking: false
         };
-       
+        
         function generateObstaclesAndCheese() {
             obstacles = [];
             cheeseBlocks = [];
@@ -71,11 +73,39 @@
                 }
             }
         }
-       
+
+        function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw player
+    ctx.drawImage(mouseSprite, player.x, player.y, player.width, player.height);
+
+    // Draw obstacles
+    obstacles.forEach(obstacle => {
+        let sprite = obstacle.type === "mousetrap" ? mousetrapSprite : catSprite;
+        ctx.drawImage(sprite, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
+    });
+
+    // Draw cheese blocks
+    cheeseBlocks.forEach(cheese => {
+        ctx.drawImage(cheeseSprite, cheese.x - worldOffset, cheese.y, cheese.width, cheese.height);
+    });
+
+    // Draw progress
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.fillText(`Checkpoint: ${currentCheckpoint * 200}`, 10, 30);
+    ctx.fillText(`Cheese: ${cheeseCollected}`, 10, 60);
+        
         function saveProgress() {
             localStorage.setItem(`platformerSave${selectedSaveSlot}`, JSON.stringify({ checkpoint: currentCheckpoint, cheese: cheeseCollected }));
         }
-       
+        
+        function resetSave(slot) {
+            localStorage.removeItem(`platformerSave${slot}`);
+            document.getElementById(`progress${slot}`).innerText = "Checkpoint: 0";
+        }
+        
         function loadProgress() {
             for (let i = 1; i <= 3; i++) {
                 let saveData = localStorage.getItem(`platformerSave${i}`);
@@ -83,7 +113,7 @@
                 document.getElementById(`progress${i}`).innerText = `Checkpoint: ${progress}`;
             }
         }
-       
+        
         function selectSaveSlot(slot) {
             selectedSaveSlot = slot;
             let saveData = localStorage.getItem(`platformerSave${selectedSaveSlot}`);
@@ -96,7 +126,7 @@
             document.getElementById("saveSelection").style.display = "none";
             startCountdown();
         }
-       
+        
         function startCountdown() {
             let count = 5;
             document.getElementById("countdown").style.display = "block";
@@ -115,9 +145,31 @@
             }
             tick();
         }
-       
+        
+        window.addEventListener("gamepadconnected", (event) => {
+            gamepadIndex = event.gamepad.index;
+        });
+
+        function checkGamepad() {
+            if (gamepadIndex !== null) {
+                const gamepad = navigator.getGamepads()[gamepadIndex];
+                if (gamepad) {
+                    if (gamepad.buttons[1].pressed && !player.isJumping) { 
+                        player.velocityY = -10;
+                        player.isJumping = true;
+                    }
+                    if (gamepad.buttons[0].pressed) { 
+                        player.isDucking = true;
+                    } else {
+                        player.isDucking = false;
+                    }
+                }
+            }
+        }
+
         function update() {
             if (!gameRunning) return;
+            checkGamepad();
             player.y += player.velocityY;
             player.velocityY += player.gravity;
             if (player.y > 300) {
@@ -125,39 +177,14 @@
                 player.isJumping = false;
             }
             worldOffset += gameSpeed;
-            if (currentCheckpoint < checkpoints.length && worldOffset >= checkpoints[currentCheckpoint] - 100) {
-                saveProgress();
-                currentCheckpoint++;
-            }
-            obstacles.forEach(ob => {
-                if (player.x + player.width > ob.x - worldOffset && player.x < ob.x - worldOffset + ob.width && player.y + player.height > ob.y) {
-                    worldOffset = checkpoints[currentCheckpoint] - 100;
-                }
-            });
-            cheeseBlocks = cheeseBlocks.filter(cheese => {
-                if (player.x + player.width > cheese.x - worldOffset && player.x < cheese.x - worldOffset + cheese.width && player.y < cheese.y + cheese.height) {
-                    cheeseCollected += 50;
-                    return false;
-                }
-                return true;
-            });
         }
-       
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "green";
-            ctx.fillRect(0, 350, canvas.width, 50);
-            ctx.drawImage(mouseSprite, player.x, player.y, player.width, player.height);
-            obstacles.forEach(ob => ctx.drawImage(ob.type === "mousetrap" ? mousetrapSprite : catSprite, ob.x - worldOffset, ob.y, ob.width, ob.height));
-            cheeseBlocks.forEach(cheese => ctx.drawImage(cheeseSprite, cheese.x - worldOffset, cheese.y, cheese.width, cheese.height));
-        }
-       
+        
         function gameLoop() {
             update();
             draw();
             requestAnimationFrame(gameLoop);
         }
-       
+        
         loadProgress();
     </script>
 </body>
