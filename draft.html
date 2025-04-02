@@ -156,11 +156,11 @@
             if (gamepadIndex !== null) {
                 const gamepad = navigator.getGamepads()[gamepadIndex];
                 if (gamepad) {
-                    if (gamepad.buttons[1].pressed && !player.isJumping) { 
+                    if (gamepad.buttons[0].pressed && !player.isJumping) { 
                         player.velocityY = -10;
                         player.isJumping = true;
                     }
-                    if (gamepad.buttons[0].pressed) { 
+                    if (gamepad.buttons[1].pressed) { 
                         player.isDucking = true;
                     } else {
                         player.isDucking = false;
