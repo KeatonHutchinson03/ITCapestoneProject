@@ -97,6 +97,7 @@
     ctx.font = "20px Arial";
     ctx.fillText(`Checkpoint: ${currentCheckpoint * 200}`, 10, 30);
     ctx.fillText(`Cheese: ${cheeseCollected}`, 10, 60);
+}
         
         function saveProgress() {
             localStorage.setItem(`platformerSave${selectedSaveSlot}`, JSON.stringify({ checkpoint: currentCheckpoint, cheese: cheeseCollected }));
