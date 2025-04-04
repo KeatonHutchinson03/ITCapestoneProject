@@ -21,6 +21,9 @@
     </div>
     <div id="countdown"></div>
     <canvas id="gameCanvas"></canvas>
+    <script src="cheese_design.js"></script>
+    <script src="mouse_trap_design.js"></script>
+    <script src="cat_design.js"></script>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
@@ -45,8 +48,7 @@
         mousetrapSprite.src = "mousetrap.png";
         const catSprite = new Image();
         catSprite.src = "cat.png";
-        const cheeseSprite = new Image();
-        cheeseSprite.src = "cheese.png";
+        
         
         const player = {
             x: 100,
@@ -83,13 +85,16 @@
 
     // Draw obstacles
     obstacles.forEach(obstacle => {
-        let sprite = obstacle.type === "mousetrap" ? mousetrapSprite : catSprite;
-        ctx.drawImage(sprite, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
+        if (obstacle.type === "mousetrap") {
+            drawMousetrap(ctx, obstacle.x - worldOffset, obstacle.y);
+        } else {
+            drawAngryCat(ctx, obstacle.x - worldOffset, obstacle.y);
+        }    
     });
 
     // Draw cheese blocks
     cheeseBlocks.forEach(cheese => {
-        ctx.drawImage(cheeseSprite, cheese.x - worldOffset, cheese.y, cheese.width, cheese.height);
+        drawCheese(ctx, cheese.x - worldOffset, cheese.y);
     });
 
     // Draw progress
