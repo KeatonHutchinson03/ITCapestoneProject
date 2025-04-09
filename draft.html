@@ -1,4 +1,3 @@
-<!-- This is a simple platformer game where the player collects cheese and avoids obstacles. The game state is saved in local storage. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,6 +38,7 @@
         let cheeseCollected = 0;
         let obstacles = [];
         let cheeseBlocks = [];
+        let platforms = [];
         let gamepadIndex = null;
         
         // Load images
@@ -64,45 +64,60 @@
         function generateObstaclesAndCheese() {
             obstacles = [];
             cheeseBlocks = [];
+            platforms = [];
+
+            // Generate platforms at random intervals
             for (let i = 300; i < 4000; i += Math.random() * 400 + 200) {
-                let type = Math.random() > 0.5 ? "mousetrap" : "cat";
-                let y = type === "mousetrap" ? 330 : 250;
-                obstacles.push({ type, x: i, y, width: 50, height: type === "mousetrap" ? 20 : 50 });
+                let platformHeight = Math.random() > 0.5 ? 300 : 250;
+                platforms.push({ x: i, y: platformHeight, width: 100, height: 20 });
             }
-            for (let i = 400; i < 4000; i += Math.random() * 400 + 200) {
-                let y = Math.random() > 0.5 ? 250 : 200;
-                if (!obstacles.some(ob => Math.abs(ob.x - i) < 100)) {
-                    cheeseBlocks.push({ x: i, y, width: 30, height: 30 });
+
+            // Generate cats on platforms
+            platforms.forEach(platform => {
+                if (Math.random() > 0.5) {
+                    let catX = platform.x + Math.random() * (platform.width - 50);
+                    obstacles.push({ type: "cat", x: catX, y: platform.y - 50, width: 50, height: 50 });
                 }
+            });
+
+            // Generate cheese blocks (scattered above and below platforms)
+            for (let i = 400; i < 4000; i += Math.random() * 400 + 200) {
+                let yPosition = Math.random() > 0.5 ? 200 : 350; // Scatter above and below platforms
+                cheeseBlocks.push({ x: i, y: yPosition, width: 30, height: 30 });
             }
         }
 
         function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw player
-    ctx.drawImage(mouseSprite, player.x, player.y, player.width, player.height);
+            // Draw player
+            ctx.drawImage(mouseSprite, player.x, player.y, player.width, player.height);
 
-    // Draw obstacles
-    obstacles.forEach(obstacle => {
-        if (obstacle.type === "mousetrap") {
-            drawMousetrap(ctx, obstacle.x - worldOffset, obstacle.y);
-        } else {
-            drawAngryCat(ctx, obstacle.x - worldOffset, obstacle.y);
-        }    
-    });
+            // Draw platforms
+            platforms.forEach(platform => {
+                ctx.fillStyle = "green";
+                ctx.fillRect(platform.x - worldOffset, platform.y, platform.width, platform.height);
+            });
 
-    // Draw cheese blocks
-    cheeseBlocks.forEach(cheese => {
-        drawCheese(ctx, cheese.x - worldOffset, cheese.y);
-    });
+            // Draw obstacles (cats)
+            obstacles.forEach(obstacle => {
+                if (obstacle.type === "cat") {
+                    ctx.drawImage(catSprite, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
+                }
+            });
 
-    // Draw progress
-    ctx.fillStyle = "black";
-    ctx.font = "20px Arial";
-    ctx.fillText(`Checkpoint: ${currentCheckpoint * 200}`, 10, 30);
-    ctx.fillText(`Cheese: ${cheeseCollected}`, 10, 60);
-}
+            // Draw cheese blocks
+            cheeseBlocks.forEach(cheese => {
+                ctx.fillStyle = "yellow";
+                ctx.fillRect(cheese.x - worldOffset, cheese.y, cheese.width, cheese.height);
+            });
+
+            // Draw progress
+            ctx.fillStyle = "black";
+            ctx.font = "20px Arial";
+            ctx.fillText(`Checkpoint: ${currentCheckpoint * 200}`, 10, 30);
+            ctx.fillText(`Cheese: ${cheeseCollected}`, 10, 60);
+        }
         
         function saveProgress() {
             localStorage.setItem(`platformerSave${selectedSaveSlot}`, JSON.stringify({ checkpoint: currentCheckpoint, cheese: cheeseCollected }));
