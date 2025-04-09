@@ -1,4 +1,5 @@
-function drawMouse(ctx, x, y, size = 50) {
+function drawMouse(ctx, x, y, playerWidth, playerHeight) {
+    const size = Math.min(playerWidth, playerHeight) * 0.8; // Adjust the mouse size relative to player size
     const bodyHeight = size;
     const bodyWidth = size * 0.6;
 

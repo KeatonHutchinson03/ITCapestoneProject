@@ -96,7 +96,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Draw player
-            ctx.drawImage(mouseSprite, player.x, player.y, player.width, player.height);
+            drawMouse(ctx, player.x, player.y, player.width, player.height);
 
             // Draw platforms
             platforms.forEach(platform => {
@@ -107,16 +107,15 @@
             // Draw obstacles (cats and mousetraps)
             obstacles.forEach(obstacle => {
                 if (obstacle.type === "cat") {
-                    ctx.drawImage(catSprite, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
+                    drawAngryCat(ctx, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
                 } else if (obstacle.type === "mousetrap") {
-                    ctx.drawImage(mousetrapSprite, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
+                    drawMousetrap(mousetrapSprite, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
                 }
             });
 
             // Draw cheese blocks
             cheeseBlocks.forEach(cheese => {
-                ctx.fillStyle = "yellow";
-                ctx.fillRect(cheese.x - worldOffset, cheese.y, cheese.width, cheese.height);
+                drawCheese(ctx, cheese.x - worldOffset, cheese.y, cheese.width, cheese.height);
             });
 
             // Draw progress
