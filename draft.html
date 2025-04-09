@@ -49,7 +49,6 @@
         const catSprite = new Image();
         catSprite.src = "cat.png";
         
-        
         const player = {
             x: 100,
             y: 300,
@@ -85,6 +84,12 @@
                 let yPosition = Math.random() > 0.5 ? 200 : 350; // Scatter above and below platforms
                 cheeseBlocks.push({ x: i, y: yPosition, width: 30, height: 30 });
             }
+
+            // Generate mousetraps at the bottom of the canvas
+            for (let i = 400; i < 4000; i += Math.random() * 400 + 200) {
+                let yPosition = 370; // Place mousetraps just above the bottom of the canvas
+                obstacles.push({ type: "mousetrap", x: i, y: yPosition, width: 30, height: 30 });
+            }
         }
 
         function draw() {
@@ -99,10 +104,12 @@
                 ctx.fillRect(platform.x - worldOffset, platform.y, platform.width, platform.height);
             });
 
-            // Draw obstacles (cats)
+            // Draw obstacles (cats and mousetraps)
             obstacles.forEach(obstacle => {
                 if (obstacle.type === "cat") {
                     ctx.drawImage(catSprite, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
+                } else if (obstacle.type === "mousetrap") {
+                    ctx.drawImage(mousetrapSprite, obstacle.x - worldOffset, obstacle.y, obstacle.width, obstacle.height);
                 }
             });
 
