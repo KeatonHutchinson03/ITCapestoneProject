@@ -1,8 +1,8 @@
 function drawAngryCat(ctx, x, y, size = 50) {
-    // Body
+    // Body (smaller and rounder)
     ctx.fillStyle = "gray";
     ctx.beginPath();
-    ctx.ellipse(x, y, size * 0.6, size, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, y, size * 0.5, size * 0.7, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Head
@@ -10,42 +10,44 @@ function drawAngryCat(ctx, x, y, size = 50) {
     ctx.arc(x, y - size, size * 0.6, 0, Math.PI * 2);
     ctx.fill();
 
-    // Ears
+    // Ears (rounded)
     ctx.beginPath();
-    ctx.moveTo(x - size * 0.5, y - size * 1.5);
-    ctx.lineTo(x - size * 0.8, y - size * 2);
-    ctx.lineTo(x - size * 0.3, y - size * 1.6);
+    ctx.arc(x - size * 0.4, y - size * 1.4, size * 0.2, 0, Math.PI * 2); // Left ear
+    ctx.arc(x + size * 0.4, y - size * 1.4, size * 0.2, 0, Math.PI * 2); // Right ear
     ctx.fill();
 
+    // Collar
+    ctx.fillStyle = "red";
+    ctx.fillRect(x - size * 0.3, y - size * 0.6, size * 0.6, size * 0.05);
+
+    // Bell
+    ctx.fillStyle = "gold";
     ctx.beginPath();
-    ctx.moveTo(x + size * 0.5, y - size * 1.5);
-    ctx.lineTo(x + size * 0.8, y - size * 2);
-    ctx.lineTo(x + size * 0.3, y - size * 1.6);
+    ctx.arc(x, y - size * 0.55, size * 0.05, 0, Math.PI * 2);
     ctx.fill();
 
     // Legs
     ctx.fillStyle = "darkgray";
     ctx.beginPath();
-    ctx.ellipse(x - size * 0.4, y + size * 0.5, size * 0.2, size * 0.4, 0, 0, Math.PI * 2);
+    ctx.ellipse(x - size * 0.3, y + size * 0.5, size * 0.2, size * 0.3, 0, 0, Math.PI * 2);
     ctx.fill();
-
     ctx.beginPath();
-    ctx.ellipse(x + size * 0.4, y + size * 0.5, size * 0.2, size * 0.4, 0, 0, Math.PI * 2);
+    ctx.ellipse(x + size * 0.3, y + size * 0.5, size * 0.2, size * 0.3, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Tail
+    // Tail - curlier and stylized
     ctx.strokeStyle = "gray";
     ctx.lineWidth = size * 0.1;
     ctx.beginPath();
-    ctx.moveTo(x + size * 0.6, y + size * 0.2);
-    ctx.quadraticCurveTo(x + size * 1.2, y, x + size * 1.4, y - size * 0.5);
+    ctx.moveTo(x + size * 0.5, y);
+    ctx.quadraticCurveTo(x + size * 1, y - size * 0.3, x + size * 0.8, y - size);
     ctx.stroke();
 
-    // Eyes (Angry look)
+    // Eyes - large and expressive
     ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.ellipse(x - size * 0.2, y - size, size * 0.15, size * 0.2, Math.PI / 8, 0, Math.PI * 2);
-    ctx.ellipse(x + size * 0.2, y - size, size * 0.15, size * 0.2, -Math.PI / 8, 0, Math.PI * 2);
+    ctx.ellipse(x - size * 0.2, y - size, size * 0.18, size * 0.25, Math.PI / 10, 0, Math.PI * 2);
+    ctx.ellipse(x + size * 0.2, y - size, size * 0.18, size * 0.25, -Math.PI / 10, 0, Math.PI * 2);
     ctx.fill();
 
     // Pupils
@@ -55,22 +57,30 @@ function drawAngryCat(ctx, x, y, size = 50) {
     ctx.arc(x + size * 0.2, y - size, size * 0.05, 0, Math.PI * 2);
     ctx.fill();
 
-    // Angry Eyebrows (moved upward)
+    // Angry Eyebrows (cartoony)
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - size * 0.3, y - size * 1.25);
+    ctx.lineTo(x - size * 0.05, y - size * 1.15);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x + size * 0.3, y - size * 1.25);
+    ctx.lineTo(x + size * 0.05, y - size * 1.15);
+    ctx.stroke();
+
+    // Nose
+    ctx.fillStyle = "pink";
+    ctx.beginPath();
+    ctx.arc(x, y - size * 0.85, size * 0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mouth (cartoon-style frown)
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(x - size * 0.4, y - size * 1.2);  // Left eyebrow higher
-    ctx.lineTo(x - size * 0.1, y - size * 1.05); // Sharper angle
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(x + size * 0.4, y - size * 1.2);  // Right eyebrow higher
-    ctx.lineTo(x + size * 0.1, y - size * 1.05); // Sharper angle
-    ctx.stroke();
-
-    // Mouth (Angry frown)
-    ctx.beginPath();
-    ctx.moveTo(x - size * 0.2, y - size * 0.8);
-    ctx.quadraticCurveTo(x, y - size * 0.9, x + size * 0.2, y - size * 0.8); // Frown shape
+    ctx.moveTo(x - size * 0.2, y - size * 0.70);
+    ctx.quadraticCurveTo(x, y - size * 0.85, x + size * 0.2, y - size * 0.75);
     ctx.stroke();
 }
