@@ -1,4 +1,4 @@
-function drawAngryCat(ctx, x, y, size = 35) {
+function drawAngryCat(ctx, x, y, size = 32) {
     // Body (smaller and rounder)
     ctx.fillStyle = "gray";
     ctx.beginPath();
