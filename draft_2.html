@@ -49,8 +49,8 @@
         let selectedSaveSlot = 1;
         let gameRunning = false;
         let worldOffset = 0;
-        let distanceTraveled = 0; // track distance in meters
-        let gameSpeed = 0.1; // Reduced speed for slower scrolling
+        let distanceTraveled = 0;
+        let gameSpeed = 0.1;
         let cheeseCollected = 0;
         let obstacles = [];
         let cheeseBlocks = [];
@@ -68,13 +68,12 @@
         const player = {
             x: 100,
             y: 300,
-            width: 30, // Made the player smaller
-            height: 30, // Made the player smaller
+            width: 30,
+            height: 30,
             velocityY: 0,
             gravity: 0.2,
             isJumping: false,
             isDucking: false,
-
         };
 
         function generateObstaclesAndCheese() {
@@ -84,7 +83,7 @@
 
             for (let i = 300; i < 4000; i += Math.random() * 400 + 200) {
                 let type = Math.random() > 0.5 ? "mousetrap" : "cat";
-                let y = type === "mousetrap" ? 330 : 250;
+                let y = type === "mousetrap" ? 325 : 250;
                 obstacles.push({ type, x: i, y, width: 50, height: type === "mousetrap" ? 20 : 50 });
             }
             for (let i = 400; i < 4000; i += Math.random() * 300 + 100) {
@@ -105,6 +104,7 @@
         }
 
         function updateLevel() {
+            let levelText = "";
             if (distanceTraveled >= 1000) {
                 gameRunning = false;
                 showGameOverScreen();
@@ -200,7 +200,7 @@
                 let data = JSON.parse(saveData);
                 distanceTraveled = data.distance;
                 cheeseCollected = data.cheese;
-                worldOffset = distanceTraveled - 100;
+                worldOffset = distanceTraveled * 2;
             } else {
                 distanceTraveled = 0;
                 cheeseCollected = 0;
@@ -237,11 +237,11 @@
             if (gamepadIndex !== null) {
                 const gamepad = navigator.getGamepads()[gamepadIndex];
                 if (gamepad) {
-                    const moveX = gamepad.axes[0]; // X-axis (left joystick)
-                    const moveY = gamepad.axes[1]; // Y-axis (left joystick)
+                    const moveX = gamepad.axes[0];
+                    const moveY = gamepad.axes[1];
 
-                    player.x += moveX * 2;  // Adjusted speed for gamepad movement
-                    player.y += moveY * 2;  // Adjusted speed for gamepad movement
+                    player.x += moveX * 2;
+                    player.y += moveY * 2;
 
                     if (gamepad.buttons[0].pressed && !player.isJumping) { 
                         player.velocityY = -10;
@@ -265,7 +265,7 @@
             platforms.forEach(platform => {
                 if (player.x + player.width > platform.x - worldOffset && player.x < platform.x - worldOffset + platform.width) {
                     if (player.y + player.height <= platform.y && player.y + player.height + player.velocityY >= platform.y) {
-                        player.y = platform.y - player.height;  // Ensure proper landing
+                        player.y = platform.y - player.height;
                         player.velocityY = 0;
                         player.isJumping = false;
                     }
@@ -278,22 +278,17 @@
             }
 
             worldOffset += gameSpeed;
-
             distanceTraveled = worldOffset * 0.5;
 
             obstacles.forEach(obstacle => {
-                if (obstacle.type === "cat" && checkCollision(player, obstacle)) {
-                    gameRunning = false;
-                    showGameOverScreen();
-                }
-                if (obstacle.type === "mousetrap" && checkCollision(player, obstacle)) {
+                if (checkCollision(player, { ...obstacle, x: obstacle.x - worldOffset })) {
                     gameRunning = false;
                     showGameOverScreen();
                 }
             });
 
             cheeseBlocks.forEach((cheese, index) => {
-                if (checkCollision(player, cheese)) {
+                if (checkCollision(player, { ...cheese, x: cheese.x - worldOffset })) {
                     cheeseBlocks.splice(index, 1);
                     cheeseCollected++;
                     saveProgress();
