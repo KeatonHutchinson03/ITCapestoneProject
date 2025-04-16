@@ -44,7 +44,7 @@
         let gameRunning = false;
         let worldOffset = 0;
         let distanceTraveled = 0;
-        let gameSpeed = 0.1;
+        let gameSpeed = 0.05;
         let cheeseCollected = 0;
         let obstacles = [];
         let cheeseBlocks = [];
@@ -58,7 +58,7 @@
         mousetrapSprite.src = "mousetrap.png";
         const catSprite = new Image();
         catSprite.src = "cat.png";
-
+    
         const player = {
             x: 100,
             y: 300,
@@ -222,7 +222,7 @@
                     const moveX = gamepad.axes[0];
                     const moveY = gamepad.axes[1];
 
-                    player.x += moveX * 2;
+                    player.x += moveX * 1;
                     player.y += moveY * 2;
 
                     if (gamepad.buttons[0].pressed && !player.isJumping) { 
