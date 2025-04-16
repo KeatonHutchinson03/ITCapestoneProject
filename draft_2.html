@@ -34,6 +34,12 @@
     <script src="mouse_trap_design.js"></script>
     <script src="cat_design.js"></script>
     <script src="mouse_design.js"></script>
+    <script src="street_design.js"></script>
+    <script src="house_design.js"></script>
+    <script src="garden_design.js"></script>
+    <script src="castle_design.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script><!-- And this as well-->
+    <!--<script src="movement.js"></script> If the movement breaks just comment this out-->
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
@@ -102,29 +108,41 @@
             if (distanceTraveled >= 1000) {
                 gameRunning = false;
                 showGameOverScreen();
-            } else if (distanceTraveled >= 750) {
-                currentLevel = "Castle";
-                canvas.style.backgroundColor = "lightgray";
-                levelText = "Castle";
-            } else if (distanceTraveled >= 500) {
-                currentLevel = "Garden";
-                canvas.style.backgroundColor = "lightyellow";
-                levelText = "Garden";
-            } else if (distanceTraveled >= 250) {
-                currentLevel = "House";
-                canvas.style.backgroundColor = "lightgreen";
-                levelText = "House";
-            } else {
+            } else if (distanceTraveled >= 0 && distanceTraveled < 250) {
                 currentLevel = "Street";
-                canvas.style.backgroundColor = "lightblue";
-                levelText = "Street";
+                
+            } else if (distanceTraveled >= 250 && distanceTraveled < 500) {
+                currentLevel = "House";
+                
+            } else if (distanceTraveled >= 500 && distanceTraveled < 750) {
+                currentLevel = "Garden";
+
+            } else if (distanceTraveled >= 750 && distanceTraveled < 1000) {
+                currentLevel = "Castle";
+
             }
-            document.getElementById("checkpointText").innerText = `Current Level: ${levelText}`;
+            return currentLevel
         }
-
-        function draw() {
+       
+        function drawBackground(ctx, currentLevel) {
+            switch (currentLevel) {
+                case "Street":
+                    drawStreetBackground(ctx)
+                    break;
+                case "House":
+                    drawLivingRoom(ctx)
+                    break;
+                case "Garden":
+                    drawGardenBackground(ctx)
+                    break;
+                case "Castle":
+                    drawCastleBackground(ctx)
+                    break;
+    }
+}
+        function draw(currentLevel) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+            drawBackground(ctx, currentLevel)
             drawMouse(ctx, player.x, player.y, player.width, player.height);
 
             obstacles.forEach(obstacle => {
@@ -277,8 +295,8 @@
                 }
             });
 
-            updateLevel();
-            draw();
+            currentLevel = updateLevel();
+            draw(currentLevel);
             saveProgress();
         }
 
