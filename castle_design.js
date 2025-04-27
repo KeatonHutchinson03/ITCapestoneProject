@@ -1,4 +1,5 @@
-const floorHeight = 80;
+function drawCastleBackground(ctx){
+    const floorHeight = 80;
     const floorY = canvas.height - floorHeight;
 
     // Stone wall background
@@ -50,3 +51,4 @@ const floorHeight = 80;
     ctx.beginPath();
     ctx.arc(canvas.width - 155, floorY - torchHeight - 5, 7, 0, Math.PI * 2);
     ctx.fill();
+}
