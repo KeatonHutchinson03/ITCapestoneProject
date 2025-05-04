@@ -18,7 +18,7 @@ $result = $stmt->get_result();
 if ($user = $result->fetch_assoc()) {
     if (password_verify($password, $user['password'])) {
         $_SESSION['username'] = $username;
-        header("draft_2(COPY)"); // Replace with your actual game page
+        header("draft_2(COPY)"); //  Replace with final draft 
         exit();
     }
 }
