@@ -1,4 +1,5 @@
 function drawStreetBackground(ctx) {
+    
     // Clear the canvas first
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 

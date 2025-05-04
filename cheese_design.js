@@ -10,7 +10,7 @@ function drawCheese(ctx, x, y) {
     ctx.fillStyle = 'lightgoldenrodyellow';
     const holes = [
         { dx: 8, dy: -5, radius: 3 },
-        { dx: 18, dy: -10, radius: 4 },
+        { dx: 18, dy: -10, radius: 3 },
         { dx: 12, dy: -15, radius: 2 }
     ];
 
