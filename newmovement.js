@@ -190,6 +190,19 @@ function loadProgress() {
     }
 }
 
+function showGameOverScreen() {
+    document.getElementById("gameOver").style.display = "block";
+
+    const stats = `
+        Cheese Collected: ${cheeseCollected}<br>
+        Last Checkpoint: ${currentLevel}<br>
+        Distance Traveled: ${Math.round(distanceTraveled)} meters
+    `;
+    document.getElementById("statsDisplay").innerHTML = stats;
+
+    canvas.style.display = "none";
+}
+
 function selectSaveSlot(slot) {
     selectedSaveSlot = slot;
     let saveData = localStorage.getItem(`platformerSave${selectedSaveSlot}`);
