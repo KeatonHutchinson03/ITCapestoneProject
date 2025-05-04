@@ -1,0 +1,311 @@
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width = 800;
+canvas.height = 400;
+
+let selectedSaveSlot = 1;
+let gameRunning = false;
+let worldOffset = 0;
+let distanceTraveled = 0;
+let gameSpeed = 0.05;
+let cheeseCollected = 0;
+let obstacles = [];
+let cheeseBlocks = [];
+let platforms = [];
+let gamepadIndex = null;
+let currentLevel = "street"; 
+
+const mouseSprite = new Image();
+mouseSprite.src = "mouse.png";
+const mousetrapSprite = new Image();
+mousetrapSprite.src = "mousetrap.png";
+const catSprite = new Image();
+catSprite.src = "cat.png";
+
+const player = {
+    x: 100,
+    y: 300,
+    width: 30,
+    height: 30,
+    velocityY: 0,
+    gravity: 0.2,
+    isJumping: false,
+    isDucking: false,
+    isBlocking: false,
+};
+
+function generateObstaclesAndCheese() {
+    obstacles = [];
+    cheeseBlocks = [];
+    platforms = [];
+
+    for (let i = 300; i < 4000; i += Math.random() * 400 + 200) {
+        let type = Math.random() > 0.5 ? "mousetrap" : "cat";
+        let y = type === "mousetrap" ? 325 : 250;
+        obstacles.push({ type, x: i, y, width: 50, height: type === "mousetrap" ? 20 : 50 });
+    }
+
+    for (let i = 400; i < 4000; i += Math.random() * 300 + 100) {
+        let y = Math.random() > 0.5 ? 250 : 200;
+        if (!obstacles.some(ob => Math.abs(ob.x - i) < 100)) {
+            cheeseBlocks.push({ x: i, y, width: 30, height: 30 });
+        }
+    }
+
+    for (let i = 400; i < 4000; i += Math.random() * 200 + 150) {
+        let platformHeight = Math.random() * 100 + 150;
+        platforms.push({ x: i, y: platformHeight, width: 100, height: 20 });
+
+        if (Math.random() < 0.2) {
+            obstacles.push({ type: "cat", x: i, y: platformHeight - 50, width: 50, height: 50 });
+        }
+    }
+}
+
+function updateLevel() {
+    let levelText = "";
+    if (distanceTraveled >= 1000) {
+        gameRunning = false;
+        showGameOverScreen();
+    } else if (distanceTraveled >= 0 && distanceTraveled < 250) {
+        currentLevel = "Street";
+        
+    } else if (distanceTraveled >= 250 && distanceTraveled < 500) {
+        currentLevel = "House";
+        
+    } else if (distanceTraveled >= 500 && distanceTraveled < 750) {
+        currentLevel = "Garden";
+
+    } else if (distanceTraveled >= 750 && distanceTraveled < 1000) {
+        currentLevel = "Castle";
+
+    }
+    return currentLevel
+}
+
+function drawBackground(ctx, currentLevel) {
+    switch (currentLevel) {
+        case "Street":
+            drawStreetBackground(ctx);
+            break;
+        case "House":
+            drawLivingRoom(ctx);
+            break;
+        case "Garden":
+            drawGardenBackground(ctx);
+            break;
+        case "Castle":
+            drawCastleBackground(ctx);
+            break;
+    }
+}
+
+function draw(currentLevel) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground(ctx, currentLevel)
+    drawMouse(ctx, player.x, player.y, player.width, player.height);
+
+    obstacles.forEach(obstacle => {
+        if (obstacle.type === "mousetrap") {
+            drawMousetrap(ctx, obstacle.x - worldOffset, obstacle.y);
+        } else if (obstacle.type === "cat") {
+            drawAngryCat(ctx, obstacle.x - worldOffset, obstacle.y);
+        }
+    });
+
+    cheeseBlocks.forEach(cheese => {
+        drawCheese(ctx, cheese.x - worldOffset, cheese.y);
+    });
+
+    platforms.forEach(platform => {
+        ctx.fillStyle = "brown";
+        ctx.fillRect(platform.x - worldOffset, platform.y, platform.width, platform.height);
+    });
+
+    if (distanceTraveled >= 1000) {
+        ctx.fillStyle = "gray";
+        ctx.beginPath();
+        ctx.arc(1100 - worldOffset, 280, 30, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.fillText(`Distance: ${Math.round(distanceTraveled)} meters`, 10, 30);
+    ctx.fillText(`Cheese: ${cheeseCollected}`, 10, 60);
+
+    if (player.isBlocking) {
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillText("Blocking", canvas.width - 100, 30);
+    }
+}
+
+function saveProgress() {
+    localStorage.setItem(`platformerSave${selectedSaveSlot}`, JSON.stringify({ distance: distanceTraveled, cheese: cheeseCollected }));
+}
+
+function resetSave(slot) {
+    localStorage.removeItem(`platformerSave${slot}`);
+    document.getElementById(`progress${slot}`).innerText = "Checkpoint: 0";
+}
+
+function loadProgress() {
+    for (let i = 1; i <= 3; i++) {
+        let saveData = localStorage.getItem(`platformerSave${i}`);
+        let progress = saveData ? JSON.parse(saveData).distance : 0;
+        let checkpoint = Math.floor(progress / 250);
+        document.getElementById(`progress${i}`).innerText = `Checkpoint: ${checkpoint}`;
+    }
+}
+
+function selectSaveSlot(slot) {
+    selectedSaveSlot = slot;
+    let saveData = localStorage.getItem(`platformerSave${selectedSaveSlot}`);
+    if (saveData) {
+        let data = JSON.parse(saveData);
+        distanceTraveled = data.distance;
+        cheeseCollected = data.cheese;
+        worldOffset = distanceTraveled * 2;
+    } else {
+        distanceTraveled = 0;
+        cheeseCollected = 0;
+        worldOffset = 0;
+    }
+    document.getElementById("saveSelection").style.display = "none";
+    startCountdown();
+}
+
+function startCountdown() {
+    let count = 5;
+    document.getElementById("countdown").style.display = "block";
+    function tick() {
+        document.getElementById("countdown").innerText = count;
+        if (count === 0) {
+            document.getElementById("countdown").style.display = "none";
+            canvas.style.display = "block";
+            gameRunning = true;
+            generateObstaclesAndCheese();
+            gameLoop();
+        } else {
+            count--;
+            setTimeout(tick, 1000);
+        }
+    }
+    tick();
+}
+
+window.addEventListener("gamepadconnected", (event) => {
+    gamepadIndex = event.gamepad.index;
+});
+
+function checkGamepad() {
+    if (gamepadIndex !== null) {
+        const gamepad = navigator.getGamepads()[gamepadIndex];
+        if (gamepad) {
+            const moveX = gamepad.axes[0];
+            const moveY = gamepad.axes[1];
+
+            player.x += moveX * 1;
+            player.y += moveY * 2;
+
+            if (gamepad.buttons[0].pressed && !player.isJumping) { 
+                player.velocityY = -10;
+                player.isJumping = true;
+            }
+            if (gamepad.buttons[1].pressed) { 
+                player.isDucking = true;
+            } else {
+                player.isDucking = false;
+            }
+
+            if (gamepad.buttons[2].pressed) {
+                player.isBlocking = true;
+            } else {
+                player.isBlocking = false;
+            }
+        }
+    }
+}
+
+function update() {
+    if (!gameRunning) return;
+    checkGamepad();
+    player.y += player.velocityY;
+    player.velocityY += player.gravity;
+
+    platforms.forEach(platform => {
+        if (player.x + player.width > platform.x - worldOffset && player.x < platform.x - worldOffset + platform.width) {
+            if (player.y + player.height <= platform.y && player.y + player.height + player.velocityY >= platform.y) {
+                player.y = platform.y - player.height;
+                player.velocityY = 0;
+                player.isJumping = false;
+            }
+        }
+    });
+
+    if (player.y > 300) {
+        player.y = 300;
+        player.isJumping = false;
+    }
+
+    worldOffset += gameSpeed;
+    distanceTraveled = worldOffset * 0.5;
+
+    obstacles.forEach(obstacle => {
+        if (checkCollision(player, { ...obstacle, x: obstacle.x - worldOffset })) {
+            if (!player.isBlocking) {
+                gameRunning = false;
+                showGameOverScreen();
+            }
+        }
+    });
+
+    cheeseBlocks.forEach((cheese, index) => {
+        if (checkCollision(player, { ...cheese, x: cheese.x - worldOffset })) {
+            cheeseBlocks.splice(index, 1);
+            cheeseCollected++;
+            saveProgress();
+        }
+    });
+
+    currentLevel = updateLevel();
+    draw(currentLevel);
+    saveProgress();
+}
+
+function checkCollision(player, object) {
+    return player.x < object.x + object.width &&
+        player.x + player.width > object.x &&
+        player.y < object.y + object.height &&
+        player.y + player.height > object.y;
+}
+
+function showGameOverScreen() {
+    document.getElementById("gameOver").style.display = "block";
+    canvas.style.display = "none";
+}
+
+function restartGame() {
+    document.getElementById("gameOver").style.display = "none";
+    gameRunning = false;
+    worldOffset = 0;
+    distanceTraveled = 0;
+    cheeseCollected = 0;
+    player.x = 100;
+    player.y = 300;
+    startCountdown();
+}
+
+document.getElementById("restartButton").addEventListener("click", restartGame);
+document.getElementById("exitButton").addEventListener("click", () => {
+    window.location.reload();
+});
+
+function gameLoop() {
+    update();
+    requestAnimationFrame(gameLoop);
+}
+
+loadProgress();
+
