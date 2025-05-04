@@ -1,16 +1,24 @@
-function drawMouse(ctx, x, y, playerWidth, playerHeight) {
-    const size = Math.min(playerWidth, playerHeight) * 0.8; // Adjust the mouse size relative to player size
+function drawMouse(ctx, x, y, playerWidth, playerHeight, player) {
+    let size = Math.min(playerWidth, playerHeight) * 0.8; // Mouse size
+    let ducking = player && player.isDucking;
+
+    if (ducking) {
+        // Shrink the height while keeping feet on the ground
+        size *= 0.6;
+        y = y + (Math.min(playerWidth, playerHeight) * 0.8 - size); // Move up to keep feet aligned
+    }
+
     const bodyHeight = size;
     const bodyWidth = size * 0.6;
 
-    // Ears
+    // Draw Ears
     ctx.fillStyle = "lightgray";
     ctx.beginPath();
     ctx.arc(x - size * 0.4, y - bodyHeight * 0.9, size * 0.25, 0, Math.PI * 2);
     ctx.arc(x + size * 0.4, y - bodyHeight * 0.9, size * 0.25, 0, Math.PI * 2);
     ctx.fill();
 
-    // Body
+    // Draw Body
     ctx.fillStyle = "gray";
     ctx.beginPath();
     ctx.ellipse(x, y, bodyWidth / 2, bodyHeight / 2, 0, 0, Math.PI * 2);

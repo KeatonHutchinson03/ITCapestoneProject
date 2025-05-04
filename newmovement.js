@@ -33,7 +33,7 @@ const player = {
     isDucking: false,
     isBlocking: false,
 };
-
+/*
 // Add this function to draw the mouse with proper ducking behavior
 function drawMouse(ctx, x, y, width, height) {
     if (player.isDucking) {
@@ -57,7 +57,7 @@ function drawMouse(ctx, x, y, width, height) {
         }
     }
 }
-
+*/
 function generateObstaclesAndCheese() {
     obstacles = [];
     cheeseBlocks = [];
@@ -127,7 +127,7 @@ function drawBackground(ctx, currentLevel) {
 function draw(currentLevel) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground(ctx, currentLevel);
-    drawMouse(ctx, player.x, player.y, player.width, player.height);
+    drawMouse(ctx, player.x, player.y, player.width, player.height, player);
 
     obstacles.forEach(obstacle => {
         if (obstacle.type === "mousetrap") {
