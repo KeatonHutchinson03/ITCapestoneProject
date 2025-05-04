@@ -32,6 +32,7 @@ const player = {
     isJumping: false,
     isDucking: false,
     isBlocking: false,
+    blockFlashTimer: 0,
 };
 /*
 // Add this function to draw the mouse with proper ducking behavior
@@ -252,6 +253,9 @@ function checkGamepad() {
             }
 
             if (gamepad.buttons[2].pressed) {
+                if (!player.isBlocking) {
+                    player.blockFlashTimer = 10;
+                }
                 player.isBlocking = true;
             } else {
                 player.isBlocking = false;
@@ -264,6 +268,10 @@ function checkGamepad() {
 function update() {
     if (!gameRunning) return;
     checkGamepad();
+    
+    if (player.blockFlashTimer > 0) {
+        player.blockFlashTimer--;
+    }
     player.y += player.velocityY;
     player.velocityY += player.gravity;
 

@@ -13,7 +13,7 @@ function drawMouse(ctx, x, y, playerWidth, playerHeight, player) {
     const bodyWidth = size * 0.6;
 
     // Draw Ears
-    ctx.fillStyle = "lightgray";
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "lightgray";
     ctx.beginPath();
     ctx.arc(x - size * 0.4, y - bodyHeight * 0.9, size * 0.25, 0, Math.PI * 2);
     ctx.arc(x + size * 0.4, y - bodyHeight * 0.9, size * 0.25, 0, Math.PI * 2);
@@ -26,19 +26,19 @@ function drawMouse(ctx, x, y, playerWidth, playerHeight, player) {
     ctx.fill();
 
     // Belly
-    ctx.fillStyle = "white";
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "white";
     ctx.beginPath();
     ctx.ellipse(x, y, bodyWidth * 0.3, bodyHeight * 0.4, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Head
-    ctx.fillStyle = "gray";
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "gray";
     ctx.beginPath();
     ctx.arc(x, y - bodyHeight * 0.7, size * 0.4, 0, Math.PI * 2);
     ctx.fill();
 
     // Cheeks
-    ctx.fillStyle = "pink";
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "pink";
     ctx.beginPath();
     ctx.arc(x - size * 0.2, y - bodyHeight * 0.7, size * 0.12, 0, Math.PI * 2);
     ctx.arc(x + size * 0.2, y - bodyHeight * 0.7, size * 0.12, 0, Math.PI * 2);
@@ -75,7 +75,7 @@ function drawMouse(ctx, x, y, playerWidth, playerHeight, player) {
     ctx.stroke();
 
     // Arms
-    ctx.strokeStyle = "gray";
+    ctx.strokeStyle =  "gray";
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(x - bodyWidth / 2, y - 10);
