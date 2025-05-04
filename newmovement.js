@@ -255,6 +255,7 @@ function checkGamepad() {
                 player.isBlocking = true;
             } else {
                 player.isBlocking = false;
+                player.blockFlashTimer = 0;
             }
         }
     }

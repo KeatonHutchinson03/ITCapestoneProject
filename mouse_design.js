@@ -1,6 +1,7 @@
 function drawMouse(ctx, x, y, playerWidth, playerHeight, player) {
     let size = Math.min(playerWidth, playerHeight) * 0.8; // Mouse size
     let ducking = player && player.isDucking;
+    let isBlocking = player && player.blockFlashTimer > 0;
 
     if (ducking) {
         // Shrink the height while keeping feet on the ground
@@ -19,7 +20,7 @@ function drawMouse(ctx, x, y, playerWidth, playerHeight, player) {
     ctx.fill();
 
     // Draw Body
-    ctx.fillStyle = "gray";
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "gray";
     ctx.beginPath();
     ctx.ellipse(x, y, bodyWidth / 2, bodyHeight / 2, 0, 0, Math.PI * 2);
     ctx.fill();
