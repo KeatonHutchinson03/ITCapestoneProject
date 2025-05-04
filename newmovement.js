@@ -34,6 +34,30 @@ const player = {
     isBlocking: false,
 };
 
+// Add this function to draw the mouse with proper ducking behavior
+function drawMouse(ctx, x, y, width, height) {
+    if (player.isDucking) {
+        // When ducking, reduce height by half but keep the feet on the ground
+        const duckHeight = height / 2;
+        const duckY = y + height - duckHeight; // Adjust Y to keep feet position
+        
+        if (mouseSprite.complete) {
+            ctx.drawImage(mouseSprite, x, duckY, width, duckHeight);
+        } else {
+            ctx.fillStyle = "gray";
+            ctx.fillRect(x, duckY, width, duckHeight);
+        }
+    } else {
+        // Normal drawing
+        if (mouseSprite.complete) {
+            ctx.drawImage(mouseSprite, x, y, width, height);
+        } else {
+            ctx.fillStyle = "gray";
+            ctx.fillRect(x, y, width, height);
+        }
+    }
+}
+
 function generateObstaclesAndCheese() {
     obstacles = [];
     cheeseBlocks = [];
@@ -102,7 +126,7 @@ function drawBackground(ctx, currentLevel) {
 
 function draw(currentLevel) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBackground(ctx, currentLevel)
+    drawBackground(ctx, currentLevel);
     drawMouse(ctx, player.x, player.y, player.width, player.height);
 
     obstacles.forEach(obstacle => {
@@ -138,6 +162,13 @@ function draw(currentLevel) {
         ctx.fillStyle = "black";
         ctx.font = "20px Arial";
         ctx.fillText("Blocking", canvas.width - 100, 30);
+    }
+    
+    // Add visual feedback for ducking
+    if (player.isDucking) {
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        ctx.fillText("Ducking", canvas.width - 100, 60);
     }
 }
 
@@ -215,6 +246,7 @@ function checkGamepad() {
             }
             if (gamepad.buttons[1].pressed) { 
                 player.isDucking = true;
+                console.log("ducking");
             } else {
                 player.isDucking = false;
             }
@@ -234,10 +266,14 @@ function update() {
     player.y += player.velocityY;
     player.velocityY += player.gravity;
 
+    // If ducking, adjust player's hitbox height for collision detection
+    const playerHeight = player.isDucking ? player.height / 2 : player.height;
+    const playerY = player.isDucking ? player.y + player.height / 2 : player.y;
+
     platforms.forEach(platform => {
         if (player.x + player.width > platform.x - worldOffset && player.x < platform.x - worldOffset + platform.width) {
-            if (player.y + player.height <= platform.y && player.y + player.height + player.velocityY >= platform.y) {
-                player.y = platform.y - player.height;
+            if (player.y + playerHeight <= platform.y && player.y + playerHeight + player.velocityY >= platform.y) {
+                player.y = platform.y - playerHeight;
                 player.velocityY = 0;
                 player.isJumping = false;
             }
@@ -253,7 +289,15 @@ function update() {
     distanceTraveled = worldOffset * 0.5;
 
     obstacles.forEach(obstacle => {
-        if (checkCollision(player, { ...obstacle, x: obstacle.x - worldOffset })) {
+        // Use adjusted height and y position for collision when ducking
+        if (checkCollision(
+            { 
+                x: player.x, 
+                y: playerY, 
+                width: player.width, 
+                height: playerHeight 
+            }, 
+            { ...obstacle, x: obstacle.x - worldOffset })) {
             if (!player.isBlocking) {
                 gameRunning = false;
                 showGameOverScreen();
@@ -262,7 +306,15 @@ function update() {
     });
 
     cheeseBlocks.forEach((cheese, index) => {
-        if (checkCollision(player, { ...cheese, x: cheese.x - worldOffset })) {
+        // Use adjusted height and y position for collision when ducking
+        if (checkCollision(
+            { 
+                x: player.x, 
+                y: playerY, 
+                width: player.width, 
+                height: playerHeight 
+            }, 
+            { ...cheese, x: cheese.x - worldOffset })) {
             cheeseBlocks.splice(index, 1);
             cheeseCollected++;
             saveProgress();
@@ -307,5 +359,5 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-loadProgress();
+loadProgress()
 
