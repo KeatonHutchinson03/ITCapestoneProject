@@ -7,7 +7,7 @@ let selectedSaveSlot = 1;
 let gameRunning = false;
 let worldOffset = 0;
 let distanceTraveled = 0;
-let gameSpeed = 0.1;
+let gameSpeed = 0.3;
 let cheeseCollected = 0;
 let obstacles = [];
 let cheeseBlocks = [];
@@ -375,7 +375,6 @@ function restartGame() {
     startCountdown();
 }
 
-document.getElementById("restartButton").addEventListener("click", restartGame);
 document.getElementById("exitButton").addEventListener("click", () => {
     window.location.reload();
 });
