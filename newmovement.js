@@ -257,7 +257,6 @@ function checkGamepad() {
             }
             if (gamepad.buttons[1].pressed) { 
                 player.isDucking = true;
-                console.log("ducking");
             } else {
                 player.isDucking = false;
             }
@@ -384,6 +383,7 @@ function showGameOverScreen() {
 
 function restartGame() {
     document.getElementById("gameOver").style.display = "none";
+    document.getElementById("endScreen").style.display = "none";
     gameRunning = false;
     worldOffset = 0;
     distanceTraveled = 0;
