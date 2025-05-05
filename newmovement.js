@@ -352,6 +352,24 @@ function checkCollision(player, object) {
         player.y + player.height > object.y;
 }
 
+function checkMousetrapCollision() {
+    for (let trap of mousetraps) {
+        if (
+            player.x < trap.x + trap.width &&
+            player.x + player.width > trap.x &&
+            player.y < trap.y + trap.height &&
+            player.y + player.height > trap.y
+        ) {
+            handleTrapCollision();
+        }
+    }
+}
+
+function handleTrapCollision() {
+    player.x = checkpoints[currentCheckpoint].x;
+    player.y = checkpoints[currentCheckpoint].y;
+}
+
 function showGameOverScreen() {
     document.getElementById("gameOver").style.display = "block";
 
