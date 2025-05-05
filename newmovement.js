@@ -7,7 +7,7 @@ let selectedSaveSlot = 1;
 let gameRunning = false;
 let worldOffset = 0;
 let distanceTraveled = 0;
-let gameSpeed = 0.2;
+let gameSpeed = 0.1;
 let cheeseCollected = 0;
 let obstacles = [];
 let cheeseBlocks = [];
@@ -352,8 +352,7 @@ function showGameOverScreen() {
     const stats = `
         Cheese Collected: ${cheeseCollected}<br>
         Last Checkpoint: ${currentLevel}<br>
-        Distance Traveled: ${Math.round(distanceTraveled)} meters
-    `;
+        Distance Traveled: ${Math.round(distanceTraveled)} meters`;
     document.getElementById("statsDisplay").innerHTML = stats;
 
     canvas.style.display = "none";
