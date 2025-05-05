@@ -1,35 +1,44 @@
-function drawMouse(ctx, x, y, playerWidth, playerHeight) {
-    const size = Math.min(playerWidth, playerHeight) * 0.8; // Adjust the mouse size relative to player size
+function drawMouse(ctx, x, y, playerWidth, playerHeight, player) {
+    let size = Math.min(playerWidth, playerHeight) * 0.8; // Mouse size
+    let ducking = player && player.isDucking;
+    let isBlocking = player && player.blockFlashTimer > 0;
+
+    if (ducking) {
+        // Shrink the height while keeping feet on the ground
+        size *= 0.6;
+        y = y + (Math.min(playerWidth, playerHeight) * 0.8 - size); // Move up to keep feet aligned
+    }
+
     const bodyHeight = size;
     const bodyWidth = size * 0.6;
 
-    // Ears
-    ctx.fillStyle = "lightgray";
+    // Draw Ears
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "lightgray";
     ctx.beginPath();
     ctx.arc(x - size * 0.4, y - bodyHeight * 0.9, size * 0.25, 0, Math.PI * 2);
     ctx.arc(x + size * 0.4, y - bodyHeight * 0.9, size * 0.25, 0, Math.PI * 2);
     ctx.fill();
 
-    // Body
-    ctx.fillStyle = "gray";
+    // Draw Body
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "gray";
     ctx.beginPath();
     ctx.ellipse(x, y, bodyWidth / 2, bodyHeight / 2, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Belly
-    ctx.fillStyle = "white";
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "white";
     ctx.beginPath();
     ctx.ellipse(x, y, bodyWidth * 0.3, bodyHeight * 0.4, 0, 0, Math.PI * 2);
     ctx.fill();
 
     // Head
-    ctx.fillStyle = "gray";
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "gray";
     ctx.beginPath();
     ctx.arc(x, y - bodyHeight * 0.7, size * 0.4, 0, Math.PI * 2);
     ctx.fill();
 
     // Cheeks
-    ctx.fillStyle = "pink";
+    ctx.fillStyle = isBlocking ? "#ff4c4c" : "pink";
     ctx.beginPath();
     ctx.arc(x - size * 0.2, y - bodyHeight * 0.7, size * 0.12, 0, Math.PI * 2);
     ctx.arc(x + size * 0.2, y - bodyHeight * 0.7, size * 0.12, 0, Math.PI * 2);
@@ -66,7 +75,7 @@ function drawMouse(ctx, x, y, playerWidth, playerHeight) {
     ctx.stroke();
 
     // Arms
-    ctx.strokeStyle = "gray";
+    ctx.strokeStyle =  "gray";
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(x - bodyWidth / 2, y - 10);
