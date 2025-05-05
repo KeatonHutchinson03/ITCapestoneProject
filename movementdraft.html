@@ -37,6 +37,11 @@
         <button id="restartButton">Restart at Checkpoint</button>
         <button id="exitButton">Exit Game</button>
     </div>
+    <div id="endScreen" style="display: none; position: absolute; top: 50px; left: 50px; width: 700px; height: 300px; background: rgba(0,0,0,0.8); color: white; font-size: 24px; text-align: center; padding-top: 100px; z-index: 10;">
+        <p>🎉 Congratulations! You beat the game! 🎉</p>
+        <button onclick="restartGame()" style="padding: 10px 20px; font-size: 20px;">Restart Run</button>
+    </div>
+    
     <canvas id="gameCanvas"></canvas>
     <script src="cheese_design.js"></script>
     <script src="mouse_trap_design.js"></script>

@@ -91,7 +91,7 @@ function updateLevel() {
     let levelText = "";
     if (distanceTraveled >= 1000) {
         gameRunning = false;
-        showGameOverScreen();
+        showGameEndScreen();
     } else if (distanceTraveled >= 0 && distanceTraveled < 250) {
         currentLevel = "Street";
         
@@ -189,6 +189,10 @@ function loadProgress() {
         let checkpoint = Math.floor(progress / 250);
         document.getElementById(`progress${i}`).innerText = `Checkpoint: ${checkpoint}`;
     }
+}
+
+function showGameEndScreen() {
+    document.getElementById("endScreen").style.display = "block";
 }
 
 function selectSaveSlot(slot) {
