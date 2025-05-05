@@ -7,7 +7,7 @@ let selectedSaveSlot = 1;
 let gameRunning = false;
 let worldOffset = 0;
 let distanceTraveled = 0;
-let gameSpeed = 0.1;
+let gameSpeed = 0.3;
 let cheeseCollected = 0;
 let obstacles = [];
 let cheeseBlocks = [];
@@ -174,7 +174,11 @@ function draw(currentLevel) {
 }
 
 function saveProgress() {
-    localStorage.setItem(`platformerSave${selectedSaveSlot}`, JSON.stringify({ distance: distanceTraveled, cheese: cheeseCollected }));
+    const checkpointDistance = Math.floor(distanceTraveled / 250) * 250;
+    localStorage.setItem(`platformerSave${selectedSaveSlot}`, JSON.stringify({ 
+        distance: checkpointDistance, 
+        cheese: cheeseCollected 
+    }));
 }
 
 function resetSave(slot) {
@@ -202,6 +206,8 @@ function selectSaveSlot(slot) {
         let data = JSON.parse(saveData);
         distanceTraveled = data.distance;
         cheeseCollected = data.cheese;
+        distanceTraveled = Math.floor(data.distance / 250) * 250;
+        cheeseCollected = data.cheese || 0;
         worldOffset = distanceTraveled * 2;
     } else {
         distanceTraveled = 0;
