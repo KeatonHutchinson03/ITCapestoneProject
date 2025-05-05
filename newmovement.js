@@ -159,18 +159,6 @@ function draw(currentLevel) {
     ctx.fillText(`Distance: ${Math.round(distanceTraveled)} meters`, 10, 30);
     ctx.fillText(`Cheese: ${cheeseCollected}`, 10, 60);
 
-    if (player.isBlocking) {
-        ctx.fillStyle = "black";
-        ctx.font = "20px Arial";
-        ctx.fillText("Blocking", canvas.width - 100, 30);
-    }
-    
-    // Add visual feedback for ducking
-    if (player.isDucking) {
-        ctx.fillStyle = "black";
-        ctx.font = "20px Arial";
-        ctx.fillText("Ducking", canvas.width - 100, 60);
-    }
 }
 
 function saveProgress() {
